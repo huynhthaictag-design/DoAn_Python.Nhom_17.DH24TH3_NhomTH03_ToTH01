@@ -16,7 +16,7 @@ class DatVeManager:
         self.parent_tab = parent_tab
         self.root = parent_tab.winfo_toplevel() 
         
-        # Biến theo dõi hover
+       
         self.hovered_item = None 
 
         self._create_widgets()
