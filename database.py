@@ -5,13 +5,14 @@ from tkinter import messagebox
 import sys
 
 # --- Database Connection ---
-def connect_db():
+def ket_noi_csdl():
     """Thiết lập và trả về đối tượng kết nối CSDL."""
     try:
+        # CẬP NHẬT MẬT KHẨU CỦA BẠN TẠI ĐÂY
         conn = mysql.connector.connect(
             host="localhost",
             user='root',
-            password='1234', 
+            password='1234', # <-- THAY MẬT KHẨU CỦA BẠN
             database="qltuyendulich"
         )
         if conn.is_connected():
@@ -21,12 +22,17 @@ def connect_db():
         print(f"Lỗi Kết Nối CSDL: {err}")
         return None
 
+# Tạo kết nối toàn cục
+conn = ket_noi_csdl()
 
-conn = connect_db()
-
-def check_db_connection(root_window):
+def kiem_tra_ket_noi(root_window):
     """Kiểm tra và thông báo nếu kết nối CSDL không khả dụng."""
-    if not conn or not conn.is_connected():
+    global conn
+    # Nếu mất kết nối, thử kết nối lại
+    if conn is None or not conn.is_connected():
+        conn = ket_noi_csdl() 
+        
+    if conn is None:
         messagebox.showerror(
             "Lỗi CSDL", 
             "Kết nối CSDL không khả dụng. Vui lòng kiểm tra MySQL server, tên database và thông tin đăng nhập."
@@ -35,4 +41,3 @@ def check_db_connection(root_window):
         sys.exit()
         return False
     return True
-

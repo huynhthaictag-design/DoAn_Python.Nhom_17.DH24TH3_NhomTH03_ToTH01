@@ -1,23 +1,26 @@
-# thongke_module.py
+# thongke.py
 
 import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
-from database import conn, check_db_connection
+from database import conn, kiem_tra_ket_noi
 
-class ThongKeManager:
+# SỬA: Đổi tên Class
+class QuanLyThongKe:
     """Quản lý giao diện và logic cho Tab Thống Kê."""
 
+    # --- HÀM KHỞI TẠO (BẮT BUỘC TÊN NÀY) ---
     def __init__(self, parent_tab):
         self.parent_tab = parent_tab
         self.root = parent_tab.winfo_toplevel()
         
         self.stats_widgets = {} # Nơi lưu trữ các Label
         
-        self._create_widgets()
-        self.load_stats()
+        # SỬA: Đổi tên hàm nội bộ
+        self.taoGiaoDien()
+        self.taiThongKe()
 
-    def _create_widgets(self):
+    def taoGiaoDien(self):
         """Thiết lập các widget hiển thị."""
         
         main_frame = tk.Frame(self.parent_tab, padx=20, pady=20)
@@ -25,13 +28,12 @@ class ThongKeManager:
         
         tk.Label(main_frame, text="BÁO CÁO & THỐNG KÊ", font=("Arial", 18, "bold"), fg="#005b96").pack(pady=10)
         
-        tk.Button(main_frame, text="Làm mới Dữ liệu", command=self.load_stats, bg="#007bff", fg="white", font=("Arial", 10, "bold")).pack(pady=10)
+        tk.Button(main_frame, text="Làm mới Dữ liệu", command=self.taiThongKe, bg="#007bff", fg="white", font=("Arial", 10, "bold")).pack(pady=10)
         
         stats_frame = tk.Frame(main_frame, relief=tk.GROOVE, borderwidth=1, padx=15, pady=15)
         stats_frame.pack(fill="x", pady=10)
         stats_frame.columnconfigure(1, weight=1)
 
-        # Danh sách các mục thống kê
         stat_items = [
             ("tong_doanh_thu", "Tổng Doanh Thu:"),
             ("tong_ve_ban", "Tổng Số Vé Đã Bán:"),
@@ -42,21 +44,16 @@ class ThongKeManager:
             ("tour_pho_bien", "Tour Phổ Biến Nhất:")
         ]
 
-        # Tạo các Label
         for i, (key, text) in enumerate(stat_items):
-            # Label Tiêu đề (Tĩnh)
             tk.Label(stats_frame, text=text, font=("Arial", 11, "bold")).grid(row=i, column=0, sticky="w", padx=10, pady=5)
-            
-            # Label Dữ liệu (Động)
             lbl_data = tk.Label(stats_frame, text="Đang tải...", font=("Arial", 11), fg="#0056b3")
             lbl_data.grid(row=i, column=1, sticky="w", padx=10, pady=5)
-            
-            # Lưu trữ label dữ liệu để cập nhật sau
             self.stats_widgets[key] = lbl_data
 
-    def load_stats(self):
+    def taiThongKe(self):
         """Tải dữ liệu thống kê từ CSDL và cập nhật giao diện."""
-        if not check_db_connection(self.root): return
+        # SỬA: Gọi đúng tên hàm
+        if not kiem_tra_ket_noi(self.root): return
         
         try:
             with conn.cursor() as cursor:

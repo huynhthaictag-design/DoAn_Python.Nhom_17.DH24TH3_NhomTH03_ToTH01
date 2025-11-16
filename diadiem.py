@@ -1,26 +1,28 @@
-# diadiem_module.py
+# diadiem.py
 
 import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
 
-# Import kết nối CSDL (Giả định file database.py và các biến conn, check_db_connection tồn tại)
-from database import conn, check_db_connection 
+# SỬA: Đổi tên hàm import
+from database import conn, kiem_tra_ket_noi 
 
-class DiaDiemManager:
+# SỬA: Đổi tên Class
+class QuanLyDiaDiem:
     """Quản lý giao diện, dữ liệu và logic CRUD cho Tab Địa Điểm."""
 
-    def init(self, parent_tab):
+    # SỬA LỖI: Đây BẮT BUỘC phải là __init__ (2 gạch dưới)
+    def __init__(self, parent_tab):
         self.parent_tab = parent_tab
         self.root = parent_tab.winfo_toplevel() 
         
-        # Biến theo dõi hover
         self.hovered_item = None 
 
-        self._create_widgets()
-        self.load_data() 
+        # SỬA: Đổi tên hàm
+        self.taoGiaoDien()
+        self.taiDuLieu() 
 
-    def _create_widgets(self):
+    def taoGiaoDien(self):
         """Thiết lập tất cả widgets trên tab3."""
         
         # 1. Tiêu đề và Khung Tìm kiếm
@@ -34,8 +36,8 @@ class DiaDiemManager:
         self.entry_search_maDD = tk.Entry(frame_search, width=15)
         self.entry_search_maDD.pack(side="left")
 
-        tk.Button(frame_search, text="Tìm", command=self.search_by_madiadiem, bg="#4da6ff", fg="white", font=("Arial", 9)).pack(side="left", padx=(6, 0))
-        tk.Button(frame_search, text="Xem Tất Cả", command=self.load_data, bg="#99CCFF", fg="black", font=("Arial", 9)).pack(side="left", padx=(15, 0))
+        tk.Button(frame_search, text="Tìm", command=self.timTheoMa, bg="#4da6ff", fg="white", font=("Arial", 9)).pack(side="left", padx=(6, 0))
+        tk.Button(frame_search, text="Xem Tất Cả", command=self.taiDuLieu, bg="#99CCFF", fg="black", font=("Arial", 9)).pack(side="left", padx=(15, 0))
 
 
         # 2. Khung nhập thông tin (Entries)
@@ -46,34 +48,29 @@ class DiaDiemManager:
         tk.Label(frame_info, text="Mã Địa Điểm:", font=("Arial", 10, "bold")).grid(row=0, column=0, padx=10, pady=5, sticky="w")
         self.entry_madiadiem = tk.Entry(frame_info, width=30); 
         self.entry_madiadiem.grid(row=0, column=1, padx=10, pady=5, sticky="w")
-        
         tk.Label(frame_info, text="Tên Địa Điểm:", font=("Arial", 10, "bold")).grid(row=1, column=0, padx=10, pady=5, sticky="w")
         self.entry_tendiadiem = tk.Entry(frame_info, width=30); self.entry_tendiadiem.grid(row=1, column=1, padx=10, pady=5, sticky="w")
-        
         tk.Label(frame_info, text="Địa Chỉ:", font=("Arial", 10, "bold")).grid(row=0, column=2, padx=10, pady=5, sticky="w")
         self.entry_diachi = tk.Entry(frame_info, width=30); self.entry_diachi.grid(row=0, column=3, padx=10, pady=5, sticky="w")
-        
         tk.Label(frame_info, text="Loại Hình:", font=("Arial", 10, "bold")).grid(row=1, column=2, padx=10, pady=5, sticky="w")
         self.combo_loaihinh = ttk.Combobox(frame_info, width=28, state="readonly", 
                                            values=["Bãi biển", "Di tích lịch sử", "Núi", "Công viên giải trí", "Thành phố", "Khác"])
         self.combo_loaihinh.grid(row=1, column=3, padx=10, pady=5, sticky="w")
         self.combo_loaihinh.set("Khác")
-        
         tk.Label(frame_info, text="Mô Tả:", font=("Arial", 10, "bold")).grid(row=2, column=0, padx=10, pady=5, sticky="w")
         self.entry_mota = tk.Entry(frame_info, width=70); self.entry_mota.grid(row=2, column=1, columnspan=3, padx=10, pady=5, sticky="w")
 
         
         # 3. Khung nút chức năng
         frame_buttons = tk.Frame(self.parent_tab, pady=10); frame_buttons.pack(pady=10)
-        tk.Button(frame_buttons, text="Thêm", width=12, bg="#4CAF50", fg="white", command=self.add_diadiem).pack(side=tk.LEFT, padx=10)
-        tk.Button(frame_buttons, text="Sửa", width=12, bg="#FFC107", fg="black", command=self.update_diadiem).pack(side=tk.LEFT, padx=10)
-        tk.Button(frame_buttons, text="Xóa", width=12, bg="#F44336", fg="white", command=self.delete_diadiem).pack(side=tk.LEFT, padx=10)
-        tk.Button(frame_buttons, text="Làm Mới", width=12, command=self.clear_entries).pack(side=tk.LEFT, padx=10)
+        tk.Button(frame_buttons, text="Thêm", width=12, bg="#4CAF50", fg="white", command=self.themDiaDiem).pack(side=tk.LEFT, padx=10)
+        tk.Button(frame_buttons, text="Sửa", width=12, bg="#FFC107", fg="black", command=self.suaDiaDiem).pack(side=tk.LEFT, padx=10)
+        tk.Button(frame_buttons, text="Xóa", width=12, bg="#F44336", fg="white", command=self.xoaDiaDiem).pack(side=tk.LEFT, padx=10)
+        tk.Button(frame_buttons, text="Làm Mới", width=12, command=self.xoaThongTinNhap).pack(side=tk.LEFT, padx=10)
 
         # 4. Treeview 
         tree_frame = tk.Frame(self.parent_tab, padx=10); tree_frame.pack(pady=10, padx=10, fill="both", expand=True)
 
-        # Logic Hover
         style = ttk.Style()
         try:
             style.theme_use("clam")
@@ -100,13 +97,12 @@ class DiaDiemManager:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.tree_diadiem.pack(fill="both", expand=True)
         
-        self.tree_diadiem.bind('<<TreeviewSelect>>', self.select_record)
-        self.tree_diadiem.bind('<Motion>', self._on_tree_hover)
-        self.tree_diadiem.bind('<Leave>', self._on_tree_leave)
+        self.tree_diadiem.bind('<<TreeviewSelect>>', self.chonHang)
+        self.tree_diadiem.bind('<Motion>', self.khiDiChuotVaoBang)
+        self.tree_diadiem.bind('<Leave>', self.khiRoiChuotKhoiBang)
 
     # --- Logic Hover ---
-
-    def _on_tree_hover(self, event):
+    def khiDiChuotVaoBang(self, event):
         item = self.tree_diadiem.identify_row(event.y)
         selected_item = self.tree_diadiem.selection()[0] if self.tree_diadiem.selection() else None
         
@@ -119,7 +115,7 @@ class DiaDiemManager:
         else:
             self.hovered_item = None 
 
-    def _on_tree_leave(self, event):
+    def khiRoiChuotKhoiBang(self, event):
         selected_item = self.tree_diadiem.selection()[0] if self.tree_diadiem.selection() else None
         
         if self.hovered_item and self.hovered_item != selected_item:
@@ -128,7 +124,7 @@ class DiaDiemManager:
             
     # --- CRUD Functions ---
     
-    def clear_entries(self):
+    def xoaThongTinNhap(self):
         """Làm sạch tất cả các trường nhập liệu."""
         self.entry_madiadiem.delete(0, tk.END)
         self.entry_tendiadiem.delete(0, tk.END)
@@ -137,11 +133,11 @@ class DiaDiemManager:
         self.combo_loaihinh.set("Khác") 
         self.tree_diadiem.selection_remove(self.tree_diadiem.selection()) 
         self.entry_search_maDD.delete(0, tk.END)
-        self._on_tree_leave(None) # Reset hover
+        self.khiRoiChuotKhoiBang(None) # Reset hover
 
-    def load_data(self):
+    def taiDuLieu(self):
         """Tải dữ liệu địa điểm từ CSDL."""
-        if not check_db_connection(self.root): return
+        if not kiem_tra_ket_noi(self.root): return
         for item in self.tree_diadiem.get_children(): self.tree_diadiem.delete(item)
 
         try:
@@ -152,17 +148,17 @@ class DiaDiemManager:
         except mysql.connector.Error as err:
             messagebox.showerror("Lỗi Tải Dữ Liệu Địa Điểm", f"Lỗi: {err}")
             
-    def search_by_madiadiem(self):
+    def timTheoMa(self):
         """Tìm kiếm địa điểm theo Mã."""
-        if not check_db_connection(self.root): return
+        if not kiem_tra_ket_noi(self.root): return
         timkiem = self.entry_search_maDD.get().strip()
-        if not timkiem: return self.load_data()
+        if not timkiem: return self.taiDuLieu()
         for item in self.tree_diadiem.get_children(): self.tree_diadiem.delete(item)
 
         try:
             madd_search = int(timkiem)
         except ValueError:
-            messagebox.showerror("Lỗi Dữ Liệu", "Mã Địa Điểm phải là số nguyên."); return self.load_data()
+            messagebox.showerror("Lỗi Dữ Liệu", "Mã Địa Điểm phải là số nguyên."); return self.taiDuLieu()
 
         try:
             with conn.cursor() as cursor:
@@ -170,15 +166,15 @@ class DiaDiemManager:
                 cursor.execute(sql, (madd_search,))
                 records = cursor.fetchall()
                 if not records:
-                    messagebox.showwarning("Không Tìm Thấy", f"Không tìm thấy Địa Điểm có Mã: {madd_search}"); self.load_data(); return
+                    messagebox.showwarning("Không Tìm Thấy", f"Không tìm thấy Địa Điểm có Mã: {madd_search}"); self.taiDuLieu(); return
                 for record in records:
                     self.tree_diadiem.insert('', tk.END, values=record, tags=('normal',))
         except mysql.connector.Error as err:
             messagebox.showerror("Lỗi Tải Dữ Liệu", f"Lỗi: {err}")
 
-    def add_diadiem(self):
+    def themDiaDiem(self):
         """Thêm một địa điểm mới."""
-        if not check_db_connection(self.root): return
+        if not kiem_tra_ket_noi(self.root): return
         
         madd_input = self.entry_madiadiem.get().strip()
         tendiadiem = self.entry_tendiadiem.get().strip()
@@ -202,16 +198,16 @@ class DiaDiemManager:
                 cursor.execute(sql, values)
                 conn.commit()
                 messagebox.showinfo("Thành Công", "Thêm địa điểm thành công.")
-                self.clear_entries()
-                self.load_data()
+                self.xoaThongTinNhap()
+                self.taiDuLieu()
         except mysql.connector.IntegrityError as err:
             messagebox.showerror("Lỗi SQL (Thêm Địa Điểm)", f"Lỗi: Mã Địa Điểm {madd} đã tồn tại.")
         except mysql.connector.Error as err:
             messagebox.showerror("Lỗi SQL (Thêm Địa Điểm)", f"Lỗi: {err}")
 
-    def update_diadiem(self):
+    def suaDiaDiem(self):
         """Cập nhật thông tin địa điểm đã chọn."""
-        if not check_db_connection(self.root): return
+        if not kiem_tra_ket_noi(self.root): return
         
         madd_input = self.entry_madiadiem.get().strip()
         tendiadiem = self.entry_tendiadiem.get().strip()
@@ -238,14 +234,14 @@ class DiaDiemManager:
                     messagebox.showinfo("Thành Công", "Cập nhật địa điểm thành công.")
                 else:
                     messagebox.showwarning("Cảnh báo", f"Không tìm thấy Địa Điểm có Mã {madd} để cập nhật.")
-                self.clear_entries()
-                self.load_data()
+                self.xoaThongTinNhap()
+                self.taiDuLieu()
         except mysql.connector.Error as err:
             messagebox.showerror("Lỗi SQL (Sửa Địa Điểm)", f"Lỗi: {err}")
 
-    def delete_diadiem(self):
+    def xoaDiaDiem(self):
         """Xóa địa điểm đã chọn."""
-        if not check_db_connection(self.root): return
+        if not kiem_tra_ket_noi(self.root): return
         
         madd_input = self.entry_madiadiem.get().strip()
         try: 
@@ -265,13 +261,12 @@ class DiaDiemManager:
                     messagebox.showinfo("Thành Công", "Xóa địa điểm thành công.")
                 else:
                     messagebox.showwarning("Cảnh báo", "Không tìm thấy địa điểm để xóa.")
-                self.clear_entries()
-                self.load_data()
+                self.xoaThongTinNhap()
+                self.taiDuLieu()
         except mysql.connector.Error as err:
-            # Lưu ý: Nếu Địa Điểm này được liên kết bằng Khóa Ngoại, việc xóa có thể bị chặn (lỗi 1451)
             messagebox.showerror("Lỗi SQL (Xóa Địa Điểm)", f"Lỗi: {err}")
 
-    def select_record(self, event):
+    def chonHang(self, event):
         """Hiển thị dữ liệu của dòng được chọn lên các ô nhập liệu."""
         
         selected_item = self.tree_diadiem.focus()
@@ -279,7 +274,6 @@ class DiaDiemManager:
              self.tree_diadiem.item(self.hovered_item, tags=('normal',))
         self.hovered_item = None
 
-        # Xóa thủ công
         self.entry_madiadiem.delete(0, tk.END)
         self.entry_tendiadiem.delete(0, tk.END)
         self.entry_diachi.delete(0, tk.END)

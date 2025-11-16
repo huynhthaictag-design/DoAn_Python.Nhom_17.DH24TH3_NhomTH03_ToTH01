@@ -4,23 +4,22 @@ import tkinter as tk
 from tkinter import ttk, Menu, messagebox
 import sys
 
-# Import modules
-from database import conn, check_db_connection 
-from hdv import HDVManager
-from QLTDL import TuyenManager 
-from diadiem import DiaDiemManager 
-from datve import DatVeManager
-from thongke import ThongKeManager
+# SỬA: Import các module và class đã đổi tên
+from database import conn, kiem_tra_ket_noi 
+from hdv import QuanLyHDV
+from QLTDL  import QuanLyTuyen 
+from diadiem import QuanLyDiaDiem 
+from datve import QuanLyDatVe
+from thongke import QuanLyThongKe
 
 # --- Bảng màu (Color Palette) ---
-# Đây là các màu từ hình ảnh của bạn
 COLORS = {
     "background": "#fffffe",
-    "headline": "#272343",      # Dùng cho Tiêu đề, Text Nút, Tab đang chọn
-    "paragraph": "#2d334a",     # Dùng cho Text thông thường
-    "button": "#ffd803",         # Nền nút
-    "button_active": "#e6c200",  # Một màu tối hơn một chút cho (tự thêm)
-    "secondary": "#e3f6f5",     # Nền tab không được chọn
+    "headline": "#272343",      
+    "paragraph": "#2d334a",     
+    "button": "#ffd803",         
+    "button_active": "#e6c200",  
+    "secondary": "#e3f6f5",     
     "tertiary": "#bae8e8"
 }
 
@@ -42,70 +41,52 @@ def open_main_app(previous_window):
     root.title("HỆ THỐNG QUẢN TRỊ DU LỊCH (ADMIN)")
     center_window(root)
     root.resizable(True, True)
-    
-    # Cấu hình màu nền chính cho cửa sổ
     root.config(bg=COLORS["background"])
 
-    if not check_db_connection(root):
+    # SỬA: Gọi hàm kiem_tra_ket_noi
+    if not kiem_tra_ket_noi(root):
         return 
 
-    # --- Style Configuration (THÊM PHẦN NÀY) ---
+    # --- Style Configuration (Giữ nguyên) ---
     style = ttk.Style(root)
-    
-    # Sử dụng một theme 'clam' để cho phép tùy chỉnh màu sắc tốt hơn
     style.theme_use('clam')
-
-    # Cấu hình chung
-    # Nền cho tất cả widget, màu chữ (foreground)
     style.configure('.', 
                     background=COLORS["background"], 
                     foreground=COLORS["paragraph"])
-
     style.configure('TFrame', 
                     background=COLORS["background"])
-
-    # Cấu hình cho Nút (TButton)
     style.configure('TButton', 
                     background=COLORS["button"], 
                     foreground=COLORS["headline"], 
                     font=('Arial', 10, 'bold'),
                     borderwidth=0)
-    # Thay đổi màu khi di chuột hoặc nhấn
     style.map('TButton',
               background=[('active', COLORS["button_active"])])
-
-    # Cấu hình cho Tab (TNotebook)
     style.configure('TNotebook', 
                     background=COLORS["background"], 
                     borderwidth=0)
-                    
     style.configure('TNotebook.Tab',
-                    background=COLORS["secondary"],  # Màu tab không được chọn
+                    background=COLORS["secondary"],  
                     foreground=COLORS["paragraph"],
                     font=('Arial', 10),
-                    padding=[10, 5]) # Thêm padding cho tab
-
-    # Thay đổi màu cho tab đang được chọn (selected)
+                    padding=[10, 5]) 
     style.map('TNotebook.Tab',
               background=[('selected', COLORS["background"])],
               foreground=[('selected', COLORS["headline"])])
 
-    # --- Menu Bar ---
+    # --- Menu Bar (Giữ nguyên) ---
     menu = Menu(root)
-    # Áp dụng màu cho Menu
     menu.config(bg=COLORS["background"], 
                fg=COLORS["paragraph"],
                activebackground=COLORS["button"],
                activeforeground=COLORS["headline"],
                relief=tk.FLAT)
-
     file_menu = Menu(menu, tearoff=0, 
                      bg=COLORS["background"], fg=COLORS["paragraph"],
                      activebackground=COLORS["button"], 
                      activeforeground=COLORS["headline"])
     file_menu.add_command(label='Exit', command=root.quit)
     menu.add_cascade(label='File', menu=file_menu)
-
     help_menu = Menu(menu, tearoff=0,
                      bg=COLORS["background"], fg=COLORS["paragraph"],
                      activebackground=COLORS["button"], 
@@ -117,7 +98,6 @@ def open_main_app(previous_window):
     # --- Notebook (Tab Control) ---
     tab_control = ttk.Notebook(root)
     
-    # Các Frame này giờ sẽ tự động lấy màu nền từ style
     tab1 = ttk.Frame(tab_control)
     tab2 = ttk.Frame(tab_control)
     tab3 = ttk.Frame(tab_control)
@@ -131,13 +111,12 @@ def open_main_app(previous_window):
     tab_control.add(tab5, text='Thống Kê & Báo Cáo')
     tab_control.pack(expand=1, fill='both', padx=10, pady=10)
 
-    # --- Khởi tạo các module quản lý ---
-    # Các module này sẽ tự động sử dụng style đã định nghĩa
-    tuyen_manager = TuyenManager(tab1)
-    hdv_manager = HDVManager(tab2)
-    diadiem_manager = DiaDiemManager(tab3)
-    datve_manager = DatVeManager(tab4)
-    thongke_manager = ThongKeManager(tab5) 
+    # --- SỬA: Khởi tạo các Class đã đổi tên ---
+    tuyen_manager = QuanLyTuyen(tab1)
+    hdv_manager = QuanLyHDV(tab2)
+    diadiem_manager = QuanLyDiaDiem(tab3)
+    datve_manager = QuanLyDatVe(tab4)
+    thongke_manager = QuanLyThongKe(tab5) 
 
     root.mainloop()
 
