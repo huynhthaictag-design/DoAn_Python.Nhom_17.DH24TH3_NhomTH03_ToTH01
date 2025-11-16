@@ -3,22 +3,16 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
-
-# SỬA: Đổi tên hàm import
 from database import conn, kiem_tra_ket_noi 
-
-# SỬA: Đổi tên Class
 class QuanLyDiaDiem:
     """Quản lý giao diện, dữ liệu và logic CRUD cho Tab Địa Điểm."""
 
-    # SỬA LỖI: Đây BẮT BUỘC phải là __init__ (2 gạch dưới)
     def __init__(self, parent_tab):
         self.parent_tab = parent_tab
         self.root = parent_tab.winfo_toplevel() 
         
         self.hovered_item = None 
 
-        # SỬA: Đổi tên hàm
         self.taoGiaoDien()
         self.taiDuLieu() 
 

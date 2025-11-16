@@ -4,14 +4,12 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
 
-# SỬA: Đổi tên hàm import
 from database import conn, kiem_tra_ket_noi 
 
-# SỬA: Đổi tên Class
 class QuanLyTuyen:
     """Quản lý giao diện, dữ liệu và logic CRUD cho Tab Tuyến Du Lịch."""
     
-    # --- HÀM KHỞI TẠO (BẮT BUỘC TÊN NÀY) ---
+    # --- HÀM KHỞI TẠO
     def __init__(self, parent_tab):
         self.parent_tab = parent_tab
         self.root = parent_tab.winfo_toplevel()
@@ -23,7 +21,6 @@ class QuanLyTuyen:
         self.hdv_map_name_to_id = {}
         self.hdv_map_id_to_name = {}
         
-        # SỬA: Đổi tên các hàm nội bộ
         self.taoGiaoDien()
         self.taiDuLieuCombobox() 
         self.taiDuLieu()

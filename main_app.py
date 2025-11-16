@@ -4,7 +4,6 @@ import tkinter as tk
 from tkinter import ttk, Menu, messagebox
 import sys
 
-# SỬA: Import các module và class đã đổi tên
 from database import conn, kiem_tra_ket_noi 
 from hdv import QuanLyHDV
 from QLTDL  import QuanLyTuyen 
@@ -12,7 +11,7 @@ from diadiem import QuanLyDiaDiem
 from datve import QuanLyDatVe
 from thongke import QuanLyThongKe
 
-# --- Bảng màu (Color Palette) ---
+
 COLORS = {
     "background": "#fffffe",
     "headline": "#272343",      
@@ -23,7 +22,7 @@ COLORS = {
     "tertiary": "#bae8e8"
 }
 
-# --- Helper Functions (Giữ nguyên) ---
+# --- Helper Functions 
 def center_window(win, w=950, h=700):
     """Căn giữa cửa sổ ứng dụng."""
     ws = win.winfo_screenwidth()
@@ -74,7 +73,7 @@ def open_main_app(previous_window):
               background=[('selected', COLORS["background"])],
               foreground=[('selected', COLORS["headline"])])
 
-    # --- Menu Bar (Giữ nguyên) ---
+    # --- Menu Bar  ---
     menu = Menu(root)
     menu.config(bg=COLORS["background"], 
                fg=COLORS["paragraph"],
@@ -111,7 +110,7 @@ def open_main_app(previous_window):
     tab_control.add(tab5, text='Thống Kê & Báo Cáo')
     tab_control.pack(expand=1, fill='both', padx=10, pady=10)
 
-    # --- SỬA: Khởi tạo các Class đã đổi tên ---
+ 
     tuyen_manager = QuanLyTuyen(tab1)
     hdv_manager = QuanLyHDV(tab2)
     diadiem_manager = QuanLyDiaDiem(tab3)

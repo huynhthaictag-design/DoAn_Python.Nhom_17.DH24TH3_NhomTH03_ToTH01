@@ -5,22 +5,19 @@ from tkinter import ttk, messagebox
 from tkcalendar import DateEntry
 from datetime import datetime, date
 import mysql.connector
-
-# SỬA: Đổi tên hàm import
 from database import conn, kiem_tra_ket_noi 
 
-# SỬA: Đổi tên Class
+
 class QuanLyHDV:
     """Quản lý giao diện, dữ liệu và logic CRUD cho Tab Hướng Dẫn Viên."""
 
-    # --- HÀM KHỞI TẠO (BẮT BUỘC TÊN NÀY) ---
+    # --- HÀM KHỞI TẠO 
     def __init__(self, parent_tab):
         self.parent_tab = parent_tab
         self.root = parent_tab.winfo_toplevel() 
         
         self.hovered_item = None 
 
-        # SỬA: Đổi tên hàm nội bộ
         self.taoGiaoDien()
         self.taiDuLieu()
 

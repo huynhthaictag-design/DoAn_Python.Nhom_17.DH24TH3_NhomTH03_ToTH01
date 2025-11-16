@@ -5,7 +5,7 @@ from tkinter import ttk, messagebox
 import mysql.connector
 from datetime import date
 
-# SỬA: Đổi tên hàm import cho đúng
+
 from database import conn, kiem_tra_ket_noi 
 
 # --- Định nghĩa màu sắc ---
@@ -16,7 +16,7 @@ COLOR_BUTTON_TEXT = "#fffffe"
 COLOR_SECONDARY = "#90b4ce" 
 COLOR_TERTIARY = "#ef4565" 
 
-# SỬA: Đổi tên Class
+
 class UngDungUser:
     """Giao diện chính cho Người dùng (User)"""
     def __init__(self, root):
@@ -73,7 +73,7 @@ class UngDungUser:
                              font=("Arial", 18, "bold"), fg=COLOR_HEADLINE, bg=COLOR_BUTTON_TEXT) 
         lbl_title.pack(pady=15)
         
-        # --- KHUNG BỘ LỌC (MỚI) ---
+        # --- KHUNG BỘ LỌC 
         filter_frame = tk.Frame(self.content_frame, bg=COLOR_BUTTON_TEXT, padx=10)
         filter_frame.pack(fill="x", pady=5)
         
@@ -142,7 +142,7 @@ class UngDungUser:
 
     def taiBoLocDiemDen(self):
         """Tải danh sách các điểm đến cho Combobox lọc."""
-        # SỬA: Gọi đúng tên hàm
+      
         if not kiem_tra_ket_noi(self.root): return
         try:
             with conn.cursor() as cursor:
@@ -329,7 +329,6 @@ class UngDungUser:
             self.tree_tours.item(self.hovered_item, tags=('normal',))
         self.hovered_item = None
 
-# --- SỬA: Đổi tên hàm toàn cục ---
 def mo_ung_dung_user(previous_window):
     """
     Hàm được gọi từ login.py sau khi đăng nhập User thành công.

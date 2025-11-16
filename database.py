@@ -8,11 +8,11 @@ import sys
 def ket_noi_csdl():
     """Thiết lập và trả về đối tượng kết nối CSDL."""
     try:
-        # CẬP NHẬT MẬT KHẨU CỦA BẠN TẠI ĐÂY
+      
         conn = mysql.connector.connect(
             host="localhost",
             user='root',
-            password='1234', # <-- THAY MẬT KHẨU CỦA BẠN
+            password='1234', 
             database="qltuyendulich"
         )
         if conn.is_connected():

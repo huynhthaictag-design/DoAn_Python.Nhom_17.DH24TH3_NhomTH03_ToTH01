@@ -4,19 +4,17 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
 from database import conn, kiem_tra_ket_noi
-
-# SỬA: Đổi tên Class
 class QuanLyThongKe:
     """Quản lý giao diện và logic cho Tab Thống Kê."""
 
-    # --- HÀM KHỞI TẠO (BẮT BUỘC TÊN NÀY) ---
+    # --- HÀM KHỞI TẠO 
     def __init__(self, parent_tab):
         self.parent_tab = parent_tab
         self.root = parent_tab.winfo_toplevel()
         
         self.stats_widgets = {} # Nơi lưu trữ các Label
         
-        # SỬA: Đổi tên hàm nội bộ
+      
         self.taoGiaoDien()
         self.taiThongKe()
 

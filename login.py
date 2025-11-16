@@ -3,13 +3,11 @@ from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 
 import main_app as admin_app 
-import user_app # SỬA: Import file
+import user_app 
 
 # --- Biến toàn cục ---
 bg_photo = None
 right_image_photo = None
-
-# --- Định nghĩa màu sắc (Giữ nguyên) ---
 COLOR_BACKGROUND_MAIN = "#3da9fc" 
 COLOR_HEADLINE = "#094067" 
 COLOR_PARAGRAPH = "#5f6c7b" 
@@ -42,13 +40,13 @@ def login_action():
         
     elif username == USER_USER and password == USER_PASS:
         status_label.config(text="Đăng nhập User thành công!", foreground="#2E7D32", bg=COLOR_BUTTON_TEXT) 
-        # SỬA: Gọi hàm đã đổi tên
+        
         root.after(500, lambda: user_app.mo_ung_dung_user(root))
         
     else:
         status_label.config(text="Tên đăng nhập hoặc mật khẩu không đúng.", foreground=COLOR_TERTIARY, bg=COLOR_BUTTON_TEXT)
 
-# --- Cửa sổ chính (Giữ nguyên) ---
+# --- Cửa sổ chính 
 root = tk.Tk()
 root.title("Đăng Nhập Hệ Thống")
 root.geometry("950x600")
@@ -57,7 +55,7 @@ root.resizable(False, False)
 username_var = tk.StringVar()
 password_var = tk.StringVar()
 
-# --- Style (Giữ nguyên) ---
+# --- Style
 style = ttk.Style()
 style.theme_use("clam")
 style.configure("TButton",
@@ -112,11 +110,11 @@ status_label = tk.Label(left_frame, text="", bg=COLOR_HEADLINE, fg=COLOR_BUTTON_
                          font=("Poppins", 9))
 status_label.pack(pady=15)
 
-# --- Khung phải: Ảnh minh họa (Giữ nguyên) ---
+# --- Khung phải: Ảnh minh hoa
 right_frame = tk.Frame(root, bg=COLOR_BUTTON_TEXT) 
 right_frame.pack(side="right", fill="both", expand=True)
 try:
-    image = Image.open("anh2.png") # File anh2.png phải ở cùng thư mục
+    image = Image.open("anh2.png") 
     image = image.resize((570, 600))
     right_image_photo = ImageTk.PhotoImage(image)
     img_label = tk.Label(right_frame, image=right_image_photo, bg=COLOR_BUTTON_TEXT)
