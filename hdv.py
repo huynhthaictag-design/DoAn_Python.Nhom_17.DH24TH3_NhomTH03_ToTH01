@@ -100,8 +100,10 @@ class QuanLyHDV:
     def khiDiChuotVaoBang(self, event):
         item = self.tree_hdv.identify_row(event.y)
         selected_item = self.tree_hdv.selection()[0] if self.tree_hdv.selection() else None
+        #nếu có hàng hover và không phải hàng được chọn thì đổi về normal
         if self.hovered_item and self.hovered_item != selected_item:
             self.tree_hdv.item(self.hovered_item, tags=('normal',))
+            #nếu có hàng mới hover và không phải hàng được chọn thì đổi thành hover
         if item and item != selected_item:
             self.tree_hdv.item(item, tags=('hover',))
             self.hovered_item = item
@@ -130,7 +132,7 @@ class QuanLyHDV:
 
     def taiDuLieu(self):
         """Tải dữ liệu hướng dẫn viên từ CSDL và hiển thị lên Treeview HDV."""
-        # SỬA: Gọi đúng tên hàm
+  
         if not kiem_tra_ket_noi(self.root): return
         for item in self.tree_hdv.get_children(): self.tree_hdv.delete(item)
 

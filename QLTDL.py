@@ -145,6 +145,7 @@ class QuanLyTuyen:
     def khiDiChuotVaoBang(self, event):
         item = self.tree_tuyendulich.identify_row(event.y)
         selected_item = self.tree_tuyendulich.selection()[0] if self.tree_tuyendulich.selection() else None
+        
         if self.hovered_item and self.hovered_item != selected_item:
             self.tree_tuyendulich.item(self.hovered_item, tags=('normal',))
         if item and item != selected_item:

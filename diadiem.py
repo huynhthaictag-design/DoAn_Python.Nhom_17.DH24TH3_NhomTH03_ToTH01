@@ -76,7 +76,7 @@ class QuanLyDiaDiem:
 
         columns = ('madiadiem', 'tendiadiem', 'diachi', 'loaihinh', 'mota')
         self.tree_diadiem = ttk.Treeview(tree_frame, columns=columns, show='headings')
-
+        #cái nào không chọn sẽ normal nền trắng chữ đen
         self.tree_diadiem.tag_configure('normal', background='white', foreground='black')
         self.tree_diadiem.tag_configure('hover', background='#e6f2ff', foreground='black')
 
@@ -85,18 +85,20 @@ class QuanLyDiaDiem:
         self.tree_diadiem.heading('diachi', text='Địa Chỉ'); self.tree_diadiem.column('diachi', width=150)
         self.tree_diadiem.heading('loaihinh', text='Loại Hình'); self.tree_diadiem.column('loaihinh', width=100, anchor='center')
         self.tree_diadiem.heading('mota', text='Mô Tả'); self.tree_diadiem.column('mota', width=200)
-
+        #tạo thanh cuộn
         scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree_diadiem.yview)
         self.tree_diadiem.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.tree_diadiem.pack(fill="both", expand=True)
-        
+        #chọn hàng nào thì hàng đó hiện lên
         self.tree_diadiem.bind('<<TreeviewSelect>>', self.chonHang)
+        #gán sự kiện di chuột vào bảng
         self.tree_diadiem.bind('<Motion>', self.khiDiChuotVaoBang)
         self.tree_diadiem.bind('<Leave>', self.khiRoiChuotKhoiBang)
 
     # --- Logic Hover ---
     def khiDiChuotVaoBang(self, event):
+        # xác định ID của hàng con đang đang đưa vào tộ độ y
         item = self.tree_diadiem.identify_row(event.y)
         selected_item = self.tree_diadiem.selection()[0] if self.tree_diadiem.selection() else None
         
@@ -111,7 +113,7 @@ class QuanLyDiaDiem:
 
     def khiRoiChuotKhoiBang(self, event):
         selected_item = self.tree_diadiem.selection()[0] if self.tree_diadiem.selection() else None
-        
+        # nếu có hàng hover và không phải hàng được chọn thì đổi về normal
         if self.hovered_item and self.hovered_item != selected_item:
             self.tree_diadiem.item(self.hovered_item, tags=('normal',))
         self.hovered_item = None
