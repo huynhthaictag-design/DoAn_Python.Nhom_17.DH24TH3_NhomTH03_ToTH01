@@ -12,7 +12,7 @@ from database import conn, check_db_connection
 class DatVeManager:
     """Quản lý giao diện, dữ liệu và logic CRUD cho Tab Đặt Vé."""
 
-    def __init__(self, parent_tab):
+    def init(self, parent_tab):
         self.parent_tab = parent_tab
         self.root = parent_tab.winfo_toplevel() 
         

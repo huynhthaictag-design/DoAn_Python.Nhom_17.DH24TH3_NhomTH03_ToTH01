@@ -21,7 +21,7 @@ def connect_db():
         print(f"Lỗi Kết Nối CSDL: {err}")
         return None
 
-# Cố gắng kết nối CSDL một lần
+
 conn = connect_db()
 
 def check_db_connection(root_window):

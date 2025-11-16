@@ -6,11 +6,11 @@ import sys
 
 # Import modules
 from database import conn, check_db_connection 
-from hdv_module import HDVManager
+from hdv import HDVManager
 from QLTDL import TuyenManager 
-from diadiem_module import DiaDiemManager 
-from datve_module import DatVeManager
-from thongke_module import ThongKeManager
+from diadiem import DiaDiemManager 
+from datve import DatVeManager
+from thongke import ThongKeManager
 
 # --- Bảng màu (Color Palette) ---
 # Đây là các màu từ hình ảnh của bạn
