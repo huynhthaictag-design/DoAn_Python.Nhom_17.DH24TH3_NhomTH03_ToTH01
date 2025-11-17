@@ -1,0 +1,82 @@
+-- 1. TẠO CƠ SỞ DỮ LIỆU (DATABASE)
+-- Đảm bảo sử dụng utf8mb4 để hỗ trợ đầy đủ tiếng Việt
+CREATE DATABASE IF NOT EXISTS qltuyendulich 
+    CHARACTER SET utf8mb4 
+    COLLATE utf8mb4_unicode_ci;
+
+-- Chọn CSDL vừa tạo để làm việc
+USE qltuyendulich;
+
+-- -----------------------------------------------------
+-- 2. TẠO BẢNG DANH MỤC (CÁC BẢNG NÀY PHẢI ĐƯỢC TẠO TRƯỚC)
+-- -----------------------------------------------------
+
+-- Bảng: DiaDiem (Lưu trữ các địa điểm)
+CREATE TABLE IF NOT EXISTS DiaDiem (
+    MaDiaDiem INT PRIMARY KEY,
+    TenDiaDiem VARCHAR(255) NOT NULL,
+    DiaChi VARCHAR(255),
+    LoaiHinh VARCHAR(100), -- Ví dụ: Bãi biển, Di tích, Khác
+    MoTa TEXT
+);
+
+-- Bảng: huongdanvien (Lưu trữ Hướng dẫn viên)
+CREATE TABLE IF NOT EXISTS huongdanvien (
+    mahdv INT PRIMARY KEY,
+    tenhdv VARCHAR(100) NOT NULL,
+    sodienthoai VARCHAR(15),
+    email VARCHAR(100) UNIQUE, -- Email không được trùng
+    ngaysinh DATE,
+    kinhnghiem INT
+);
+
+-- -----------------------------------------------------
+-- 3. TẠO BẢNG CHÍNH (THAM CHIẾU ĐẾN CÁC BẢNG TRÊN)
+-- -----------------------------------------------------
+
+-- Bảng: tuyendulich (Lưu trữ các tour)
+CREATE TABLE IF NOT EXISTS tuyendulich (
+    maso INT PRIMARY KEY,
+    tentuyen VARCHAR(255) NOT NULL,
+    
+    MaDiemKhoiHanh INT, -- Khóa ngoại
+    MaDiemDen INT,      -- Khóa ngoại
+    
+    thoiluong VARCHAR(50),
+    giatour DECIMAL(10, 2) NOT NULL,
+    mota TEXT,
+    
+    MaHDV INT,          -- Khóa ngoại
+    loaitour VARCHAR(50) NOT NULL DEFAULT 'Trong Nước',
+
+    -- Định nghĩa các liên kết Khóa ngoại (Foreign Key)
+    FOREIGN KEY (MaDiemKhoiHanh) REFERENCES DiaDiem(MaDiaDiem)
+        ON DELETE SET NULL  -- Nếu Địa điểm bị xóa, cột này tự động đổi thành NULL
+        ON UPDATE CASCADE,  -- Nếu Mã Địa điểm thay đổi, tự động cập nhật ở đây
+    
+    FOREIGN KEY (MaDiemDen) REFERENCES DiaDiem(MaDiaDiem)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+        
+    FOREIGN KEY (MaHDV) REFERENCES huongdanvien(mahdv)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+-- -----------------------------------------------------
+-- 4. TẠO BẢNG NGHIỆP VỤ (THAM CHIẾU ĐẾN BẢNG CHÍNH)
+-- -----------------------------------------------------
+
+-- Bảng: DatVe (Lưu trữ các vé đã bán)
+CREATE TABLE IF NOT EXISTS DatVe (
+    MaVe INT PRIMARY KEY,       -- Mã vé do Python tự tạo (MAX + 1)
+    MaTuyen INT NOT NULL,     -- Khóa ngoại
+    NgayDatVe DATE NOT NULL,
+    SoLuongVe INT NOT NULL DEFAULT 1,
+    TongTien DECIMAL(10, 2),
+    
+    -- Định nghĩa liên kết Khóa ngoại
+    FOREIGN KEY (MaTuyen) REFERENCES tuyendulich(maso)
+        ON DELETE RESTRICT  -- Ngăn không cho xóa Tour nếu Tour đó đã có vé
+        ON UPDATE CASCADE
+);
