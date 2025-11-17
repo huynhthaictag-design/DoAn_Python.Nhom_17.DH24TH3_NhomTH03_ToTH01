@@ -50,7 +50,6 @@ class QuanLyThongKe:
 
     def taiThongKe(self):
         """Tải dữ liệu thống kê từ CSDL và cập nhật giao diện."""
-        # SỬA: Gọi đúng tên hàm
         if not kiem_tra_ket_noi(self.root): return
         
         try:

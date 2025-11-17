@@ -5,7 +5,6 @@ from tkinter import ttk, messagebox
 import mysql.connector
 from datetime import date
 
-
 from database import conn, kiem_tra_ket_noi 
 
 # --- Định nghĩa màu sắc ---
@@ -25,14 +24,19 @@ class UngDungUser:
         self.root.geometry("1100x700") 
         self.root.resizable(True, True)
 
-        self.hovered_item = None
+        self.hovered_item_tour = None # Hover cho bảng tour
+        self.hovered_item_ve = None   # Hover cho bảng vé
         
         self.taoKhungChinh()
         self.taoMenuTrai()
         self.taoKhungNoiDung()
         
+        # Tải dữ liệu ban đầu
         self.taiBoLocDiemDen() 
-        self.taiDuLieuTour() 
+        self.taiDuLieuTour()
+        
+        # Hiển thị khung tour làm mặc định
+        self.hienThiTour()
 
     def taoKhungChinh(self):
         """Tạo 2 khung chính: Menu (trái) và Nội dung (phải)"""
@@ -40,6 +44,7 @@ class UngDungUser:
         self.menu_frame.pack(side="left", fill="y")
         self.menu_frame.pack_propagate(False)
 
+        # Khung này sẽ chứa các khung nội dung con (xem tour, xem vé)
         self.content_frame = tk.Frame(self.root, bg=COLOR_BUTTON_TEXT) 
         self.content_frame.pack(side="right", fill="both", expand=True)
 
@@ -51,6 +56,7 @@ class UngDungUser:
 
         menu_items = [
             ("Xem Tours", self.hienThiTour),
+            ("Vé Của Tôi", self.hienThiVeCuaToi), # <-- NÚT MỚI
             ("Đặt Vé", self.moCuaSoDatVe), 
             ("Thoát", self.root.quit)
         ]
@@ -67,16 +73,34 @@ class UngDungUser:
             btn.bind("<Leave>", lambda e, b=btn: b.config(bg=COLOR_BACKGROUND_MAIN, fg=COLOR_BUTTON_TEXT))
 
     def taoKhungNoiDung(self):
-        """Tạo khu vực hiển thị Treeview (List view) và Bộ lọc"""
+        """Tạo các khung con cho 'Xem Tour' và 'Xem Vé'."""
         
-        lbl_title = tk.Label(self.content_frame, text="DANH SÁCH CÁC TOUR HIỆN CÓ", 
+        # 1. Tạo Khung Xem Tour (giống như code cũ)
+        self.khung_xem_tour = tk.Frame(self.content_frame, bg=COLOR_BUTTON_TEXT)
+        self.taoGiaoDienXemTour(self.khung_xem_tour) # Gọi hàm vẽ giao diện tour
+        self.khung_xem_tour.pack(fill="both", expand=True) # Pack nó vào
+
+        # 2. Tạo Khung Vé Của Tôi (mới)
+        self.khung_ve_cua_toi = tk.Frame(self.content_frame, bg=COLOR_BUTTON_TEXT)
+        self.taoGiaoDienVeCuaToi(self.khung_ve_cua_toi) # Gọi hàm vẽ giao diện vé
+        self.khung_ve_cua_toi.pack(fill="both", expand=True)
+        
+        # Ban đầu, ẩn khung vé đi
+        self.khung_ve_cua_toi.pack_forget()
+
+
+    def taoGiaoDienXemTour(self, parent_frame):
+        """Tạo khu vực hiển thị Treeview (List view) và Bộ lọc."""
+        
+        lbl_title = tk.Label(parent_frame, text="DANH SÁCH CÁC TOUR HIỆN CÓ", 
                              font=("Arial", 18, "bold"), fg=COLOR_HEADLINE, bg=COLOR_BUTTON_TEXT) 
         lbl_title.pack(pady=15)
         
         # --- KHUNG BỘ LỌC 
-        filter_frame = tk.Frame(self.content_frame, bg=COLOR_BUTTON_TEXT, padx=10)
+        filter_frame = tk.Frame(parent_frame, bg=COLOR_BUTTON_TEXT, padx=10)
         filter_frame.pack(fill="x", pady=5)
         
+        # (Giữ nguyên code bộ lọc)
         tk.Label(filter_frame, text="Loại Tour:", font=("Arial", 10), bg=COLOR_BUTTON_TEXT, fg=COLOR_PARAGRAPH).pack(side=tk.LEFT, padx=(5,2))
         self.combo_filter_loai = ttk.Combobox(filter_frame, width=12, state="readonly", values=["Tất cả", "Trong Nước", "Nước Ngoài"])
         self.combo_filter_loai.pack(side=tk.LEFT, padx=(0,10))
@@ -91,19 +115,13 @@ class UngDungUser:
         tk.Label(filter_frame, text="Giá đến:", font=("Arial", 10), bg=COLOR_BUTTON_TEXT, fg=COLOR_PARAGRAPH).pack(side=tk.LEFT, padx=(5,2))
         self.entry_filter_gia_den = tk.Entry(filter_frame, width=12, relief="solid", bd=1, highlightcolor=COLOR_SECONDARY)
         self.entry_filter_gia_den.pack(side=tk.LEFT, padx=(0,10))
-
-        btn_filter = tk.Button(filter_frame, text="Lọc", font=("Arial", 10, "bold"), 
-                               bg=COLOR_BACKGROUND_MAIN, fg=COLOR_BUTTON_TEXT, 
-                               command=self.taiDuLieuTour, relief="flat", cursor="hand2") 
+        btn_filter = tk.Button(filter_frame, text="Lọc", font=("Arial", 10, "bold"), bg=COLOR_BACKGROUND_MAIN, fg=COLOR_BUTTON_TEXT, command=self.taiDuLieuTour, relief="flat", cursor="hand2") 
         btn_filter.pack(side=tk.LEFT, padx=5)
-        
-        btn_clear_filter = tk.Button(filter_frame, text="Xóa Lọc", font=("Arial", 10), 
-                                     bg=COLOR_SECONDARY, fg=COLOR_HEADLINE, 
-                                     command=self.xoaBoLoc, relief="flat", cursor="hand2") 
+        btn_clear_filter = tk.Button(filter_frame, text="Xóa Lọc", font=("Arial", 10), bg=COLOR_SECONDARY, fg=COLOR_HEADLINE, command=self.xoaBoLoc, relief="flat", cursor="hand2") 
         btn_clear_filter.pack(side=tk.LEFT, padx=5)
         
-        # --- KHUNG TREEVIEW ---
-        tree_frame = tk.Frame(self.content_frame, padx=10, bg=COLOR_BUTTON_TEXT) 
+        # --- KHUNG TREEVIEW TOUR ---
+        tree_frame = tk.Frame(parent_frame, padx=10, bg=COLOR_BUTTON_TEXT) 
         tree_frame.pack(pady=10, padx=10, fill="both", expand=True)
 
         style = ttk.Style()
@@ -119,7 +137,6 @@ class UngDungUser:
 
         self.tree_tours.tag_configure('normal', background=COLOR_BUTTON_TEXT, foreground=COLOR_PARAGRAPH)
         self.tree_tours.tag_configure('hover', background='#e0f2f7', foreground=COLOR_HEADLINE) 
-
         self.tree_tours.config(displaycolumns=('tentuyen', 'khoihanh', 'diemden', 'thoiluong', 'giatour_display', 'hdv', 'loai', 'mota'))
 
         self.tree_tours.heading('tentuyen', text='Tên Tuyến'); self.tree_tours.column('tentuyen', width=180)
@@ -136,13 +153,62 @@ class UngDungUser:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.tree_tours.pack(fill="both", expand=True)
         
-        self.tree_tours.bind('<Motion>', self.khiDiChuotVaoBang)
-        self.tree_tours.bind('<Leave>', self.khiRoiChuotKhoiBang)
+        self.tree_tours.bind('<Motion>', self.khiDiChuotVaoBangTour)
+        self.tree_tours.bind('<Leave>', self.khiRoiChuotKhoiBangTour)
         self.tree_tours.bind('<Double-1>', self.moCuaSoDatVe)
+
+    def taoGiaoDienVeCuaToi(self, parent_frame):
+        """Tạo giao diện cho Tab 'Vé Của Tôi'."""
+        lbl_title = tk.Label(parent_frame, text="DANH SÁCH VÉ ĐÃ ĐẶT", 
+                             font=("Arial", 18, "bold"), fg=COLOR_HEADLINE, bg=COLOR_BUTTON_TEXT) 
+        lbl_title.pack(pady=15)
+        
+        btn_refresh = tk.Button(parent_frame, text="Tải lại danh sách", font=("Arial", 10, "bold"), 
+                               bg=COLOR_BACKGROUND_MAIN, fg=COLOR_BUTTON_TEXT, 
+                               command=self.taiDuLieuVeCuaToi, relief="flat", cursor="hand2") 
+        btn_refresh.pack(pady=10)
+        
+        tree_frame = tk.Frame(parent_frame, padx=10, bg=COLOR_BUTTON_TEXT) 
+        tree_frame.pack(pady=10, padx=10, fill="both", expand=True)
+
+        columns_ve = ('mave', 'tentuyen', 'ngaydatve', 'soluongve', 'tongtien')
+        self.tree_ve_cua_toi = ttk.Treeview(tree_frame, columns=columns_ve, show='headings')
+
+        self.tree_ve_cua_toi.tag_configure('normal', background=COLOR_BUTTON_TEXT, foreground=COLOR_PARAGRAPH)
+        self.tree_ve_cua_toi.tag_configure('hover', background='#e0f2f7', foreground=COLOR_HEADLINE) 
+
+        self.tree_ve_cua_toi.heading('mave', text='Mã Vé'); self.tree_ve_cua_toi.column('mave', width=80, anchor='center')
+        self.tree_ve_cua_toi.heading('tentuyen', text='Tên Tuyến'); self.tree_ve_cua_toi.column('tentuyen', width=300)
+        self.tree_ve_cua_toi.heading('ngaydatve', text='Ngày Đặt'); self.tree_ve_cua_toi.column('ngaydatve', width=100, anchor='center')
+        self.tree_ve_cua_toi.heading('soluongve', text='Số Lượng'); self.tree_ve_cua_toi.column('soluongve', width=80, anchor='center')
+        self.tree_ve_cua_toi.heading('tongtien', text='Tổng Tiền'); self.tree_ve_cua_toi.column('tongtien', width=120, anchor='e')
+        
+        scrollbar_ve = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree_ve_cua_toi.yview)
+        self.tree_ve_cua_toi.configure(yscrollcommand=scrollbar_ve.set)
+        scrollbar_ve.pack(side=tk.RIGHT, fill=tk.Y)
+        self.tree_ve_cua_toi.pack(fill="both", expand=True)
+        
+        self.tree_ve_cua_toi.bind('<Motion>', self.khiDiChuotVaoBangVe)
+        self.tree_ve_cua_toi.bind('<Leave>', self.khiRoiChuotKhoiBangVe)
+
+
+    # --- Các hàm chuyển đổi View ---
+    def hienThiTour(self):
+        """Hiển thị khung xem tour và ẩn khung xem vé."""
+        self.khung_ve_cua_toi.pack_forget()
+        self.khung_xem_tour.pack(fill="both", expand=True)
+
+    def hienThiVeCuaToi(self):
+        """Hiển thị khung xem vé và ẩn khung xem tour."""
+        self.khung_xem_tour.pack_forget()
+        self.khung_ve_cua_toi.pack(fill="both", expand=True)
+        self.taiDuLieuVeCuaToi() # Tải dữ liệu mới nhất khi chuyển tab
+
+
+    # --- Các hàm tải dữ liệu ---
 
     def taiBoLocDiemDen(self):
         """Tải danh sách các điểm đến cho Combobox lọc."""
-      
         if not kiem_tra_ket_noi(self.root): return
         try:
             with conn.cursor() as cursor:
@@ -182,35 +248,25 @@ class UngDungUser:
         params = []
         
         try:
+            # (Logic lọc giữ nguyên)
             loai_tour = self.combo_filter_loai.get()
             if loai_tour and loai_tour != "Tất cả":
                 where_clauses.append("T.loaitour = %s")
                 params.append(loai_tour)
-
             diem_den = self.combo_filter_diemden.get()
             if diem_den and diem_den != "Tất cả":
                 where_clauses.append("DD_Den.TenDiaDiem = %s")
                 params.append(diem_den)
-
             gia_tu_str = self.entry_filter_gia_tu.get()
             if gia_tu_str:
-                try:
-                    gia_tu = float(gia_tu_str)
-                    where_clauses.append("T.giatour >= %s")
-                    params.append(gia_tu)
-                except ValueError:
-                    messagebox.showwarning("Lỗi Dữ Liệu", "Giá TỪ phải là một con số.")
-                    return
-
+                gia_tu = float(gia_tu_str)
+                where_clauses.append("T.giatour >= %s")
+                params.append(gia_tu)
             gia_den_str = self.entry_filter_gia_den.get()
             if gia_den_str:
-                try:
-                    gia_den = float(gia_den_str)
-                    where_clauses.append("T.giatour <= %s")
-                    params.append(gia_den)
-                except ValueError:
-                    messagebox.showwarning("Lỗi Dữ Liệu", "Giá ĐẾN phải là một con số.")
-                    return
+                gia_den = float(gia_den_str)
+                where_clauses.append("T.giatour <= %s")
+                params.append(gia_den)
 
             final_sql = base_sql
             if where_clauses:
@@ -224,6 +280,36 @@ class UngDungUser:
                     
         except mysql.connector.Error as err:
             messagebox.showerror("Lỗi Tải Dữ Liệu Tours", f"Lỗi: {err}")
+        except ValueError:
+             messagebox.showwarning("Lỗi Dữ Liệu", "Giá TỪ hoặc Giá ĐẾN phải là một con số.")
+
+
+    def taiDuLieuVeCuaToi(self):
+        """Tải danh sách các vé đã đặt từ CSDL."""
+        if not kiem_tra_ket_noi(self.root): return
+        for item in self.tree_ve_cua_toi.get_children():
+            self.tree_ve_cua_toi.delete(item)
+            
+        try:
+            with conn.cursor() as cursor:
+                # Dùng JOIN để lấy Tên Tuyến từ MaTuyen
+                sql = """
+                SELECT 
+                    DV.MaVe, 
+                    T.tentuyen, 
+                    DATE_FORMAT(DV.NgayDatVe, '%d/%m/%Y'), 
+                    DV.SoLuongVe, 
+                    CONCAT(FORMAT(DV.TongTien, 0), ' VNĐ') AS TongTienDisplay
+                FROM DatVe AS DV
+                JOIN tuyendulich AS T ON DV.MaTuyen = T.maso
+                ORDER BY DV.MaVe DESC
+                """
+                cursor.execute(sql)
+                for record in cursor.fetchall():
+                    self.tree_ve_cua_toi.insert('', tk.END, values=record, tags=('normal',))
+                    
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi Tải Dữ Liệu Vé", f"Lỗi: {err}")
 
     
     # --- Chức năng Đặt Vé ---
@@ -245,15 +331,14 @@ class UngDungUser:
             messagebox.showerror("Lỗi Dữ Liệu", "Không thể lấy thông tin tour. Dữ liệu bị lỗi.")
             return
 
+        # (Code tạo cửa sổ Toplevel giữ nguyên)
         self.book_window = tk.Toplevel(self.root)
         self.book_window.title("Xác Nhận Đặt Vé")
         self.book_window.geometry("400x350")
         self.book_window.transient(self.root) 
         self.book_window.grab_set() 
-
         form_frame = tk.Frame(self.book_window, padx=20, pady=20, bg=COLOR_BUTTON_TEXT) 
         form_frame.pack(fill="both", expand=True)
-
         tk.Label(form_frame, text="ĐẶT VÉ TOUR", font=("Arial", 16, "bold"), fg=COLOR_HEADLINE, bg=COLOR_BUTTON_TEXT).pack(pady=10)
         tk.Label(form_frame, text=f"Tour: {ten_tuyen}", font=("Arial", 11, "bold"), fg=COLOR_PARAGRAPH, bg=COLOR_BUTTON_TEXT).pack(anchor="w", pady=5)
         tk.Label(form_frame, text=f"Giá vé: {gia_tour_raw:,.0f} VNĐ/vé", font=("Arial", 10), fg=COLOR_PARAGRAPH, bg=COLOR_BUTTON_TEXT).pack(anchor="w")
@@ -261,7 +346,6 @@ class UngDungUser:
         entry_soluong = tk.Spinbox(form_frame, from_=1, to=50, width=10, font=("Arial", 10),
                                    bg=COLOR_BUTTON_TEXT, fg=COLOR_HEADLINE, highlightbackground=COLOR_SECONDARY) 
         entry_soluong.pack(anchor="w", fill="x", pady=5)
-        
         submit_btn = ttk.Button(form_frame, text="Xác nhận Đặt Vé", 
                                 style="TButton", 
                                 command=lambda: self.xacNhanDatVe( 
@@ -304,35 +388,51 @@ class UngDungUser:
                                     parent=self.book_window)
                 
                 self.book_window.destroy() 
+        
+                # self.taiDuLieuVeCuaToi() 
                 
         except mysql.connector.Error as err:
             conn.rollback()
             messagebox.showerror("Lỗi CSDL", f"Không thể đặt vé: {err}", parent=self.book_window)
 
-    def hienThiTour(self):
-        pass 
+ 
 
-    # --- Logic Hover ---
-    def khiDiChuotVaoBang(self, event):
+    # --- Logic Hover 
+    def khiDiChuotVaoBangTour(self, event):
         item = self.tree_tours.identify_row(event.y)
         selected_item = self.tree_tours.selection()[0] if self.tree_tours.selection() else None
-        if self.hovered_item and self.hovered_item != selected_item:
-            self.tree_tours.item(self.hovered_item, tags=('normal',))
+        if self.hovered_item_tour and self.hovered_item_tour != selected_item:
+            self.tree_tours.item(self.hovered_item_tour, tags=('normal',))
         if item and item != selected_item:
             self.tree_tours.item(item, tags=('hover',))
-            self.hovered_item = item
-        else: self.hovered_item = None
+            self.hovered_item_tour = item
+        else: self.hovered_item_tour = None
     
-    def khiRoiChuotKhoiBang(self, event):
+    def khiRoiChuotKhoiBangTour(self, event):
         selected_item = self.tree_tours.selection()[0] if self.tree_tours.selection() else None
-        if self.hovered_item and self.hovered_item != selected_item:
-            self.tree_tours.item(self.hovered_item, tags=('normal',))
-        self.hovered_item = None
+        if self.hovered_item_tour and self.hovered_item_tour != selected_item:
+            self.tree_tours.item(self.hovered_item_tour, tags=('normal',))
+        self.hovered_item_tour = None
+        
+    def khiDiChuotVaoBangVe(self, event):
+        item = self.tree_ve_cua_toi.identify_row(event.y)
+        selected_item = self.tree_ve_cua_toi.selection()[0] if self.tree_ve_cua_toi.selection() else None
+        if self.hovered_item_ve and self.hovered_item_ve != selected_item:
+            self.tree_ve_cua_toi.item(self.hovered_item_ve, tags=('normal',))
+        if item and item != selected_item:
+            self.tree_ve_cua_toi.item(item, tags=('hover',))
+            self.hovered_item_ve = item
+        else: self.hovered_item_ve = None
+    
+    def khiRoiChuotKhoiBangVe(self, event):
+        selected_item = self.tree_ve_cua_toi.selection()[0] if self.tree_ve_cua_toi.selection() else None
+        if self.hovered_item_ve and self.hovered_item_ve != selected_item:
+            self.tree_ve_cua_toi.item(self.hovered_item_ve, tags=('normal',))
+        self.hovered_item_ve = None
 
+# --- Hàm gọi App 
 def mo_ung_dung_user(previous_window):
-    """
-    Hàm được gọi từ login.py sau khi đăng nhập User thành công.
-    """
+
     if previous_window:
         previous_window.destroy()
     root = tk.Tk()

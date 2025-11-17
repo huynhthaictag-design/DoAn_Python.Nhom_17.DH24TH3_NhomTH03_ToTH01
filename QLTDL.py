@@ -107,7 +107,7 @@ class QuanLyTuyen:
         frame_buttons_tuyen = tk.Frame(self.parent_tab, pady=10); frame_buttons_tuyen.pack(pady=5)
         tk.Button(frame_buttons_tuyen, text="Thêm Tuyến", width=12, bg="#008CBA", fg="white", command=self.themTuyen).pack(side=tk.LEFT, padx=10)
         tk.Button(frame_buttons_tuyen, text="Sửa Tuyến", width=12, bg="#FFA500", fg="black", command=self.suaTuyen).pack(side=tk.LEFT, padx=10)
-        tk.Button(frame_buttons_tuyen, text="Xóa Tuyến", width=12, bg="#DC143C", fg="white", command=self.xoaTuyen).pack(side=tk.LEFT, padx=10)
+        tk.Button(frame_buttons_tuyen, text="Xóa Tuyến", width=12, bg="#D000FF", fg="white", command=self.xoaTuyen).pack(side=tk.LEFT, padx=10)
         tk.Button(frame_buttons_tuyen, text="Làm Mới", width=12, command=self.xoaThongTinNhap).pack(side=tk.LEFT, padx=10)
 
         # 4. Treeview
@@ -120,6 +120,7 @@ class QuanLyTuyen:
 
         columns_tuyen = ('maso', 'tentuyen', 'TenDiemKhoiHanh', 'TenDiemDen', 'thoiluong', 'giatour', 'TenHDV', 'loaitour')
         self.tree_tuyendulich = ttk.Treeview(tree_frame_tuyen, columns=columns_tuyen, show='headings')
+
         self.tree_tuyendulich.tag_configure('normal', background='white', foreground='black')
         self.tree_tuyendulich.tag_configure('hover', background='#e6f2ff', foreground='black')
 

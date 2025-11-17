@@ -101,10 +101,10 @@ class QuanLyDiaDiem:
         # xác định ID của hàng con đang đang đưa vào tộ độ y
         item = self.tree_diadiem.identify_row(event.y)
         selected_item = self.tree_diadiem.selection()[0] if self.tree_diadiem.selection() else None
-        
+        # nếu có hàng hover và không phải hàng được chọn thì đổi về normal
         if self.hovered_item and self.hovered_item != selected_item:
             self.tree_diadiem.item(self.hovered_item, tags=('normal',))
-            
+        # nếu con trỏ chuột đang ở trên một hàng khác với hàng hover hiện tại và không phải hàng được chọn thì đổi hàng đó thành hover
         if item and item != selected_item:
             self.tree_diadiem.item(item, tags=('hover',))
             self.hovered_item = item
